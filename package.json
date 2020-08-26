@@ -1,0 +1,12 @@
+{
+  "name": "reverse-proxy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:wangkaiwd/reverse-proxy.git",
+  "author": "wangkaiwd <1162486176@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "http-proxy-middleware": "^1.0.5"
+  }
+}
