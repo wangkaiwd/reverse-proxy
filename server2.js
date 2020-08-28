@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 const PORT = 4000;
-app.use('/user/list1', (req, res) => {
+app.use((req, res) => {
+  res.set('X-Real-IP', req.protocol + '://' + req.get('host') + req.originalUrl);
   res.json({
     data: [
       { name: '4', age: 14 },

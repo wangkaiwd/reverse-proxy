@@ -3,26 +3,35 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const axios = require('axios');
 const app = express();
 const PORT = 3000;
+const PROXY_FLAG = '/api';
+const TARGET = 'http://localhost:4000';
+
 // proxy middleware options
 const options = {
-  target: 'http://www.example.org', // target host
+  target: TARGET,
   changeOrigin: true, // needed for virtual hosted sites
-  ws: true, // proxy websockets
-  // pathRewrite: {
-  //   '^/api/old-path': '/api/new-path', // rewrite path
-  // },
 };
-
+const setProxy = (proxyFlag, options) => {
+  const exampleProxy = createProxyMiddleware(options);
+  const index = app._router.stack.indexOf(exampleProxy);
+  if (index !== -1) {
+    app._router.stack.splice(index, 1);
+  }
+  app.use(proxyFlag, exampleProxy);
+};
 // create the proxy (without context)
-const exampleProxy = createProxyMiddleware(options);
-app.use('/api', exampleProxy);
-app.use('/user/list', (req, res) => {
+// setProxy(PROXY_FLAG, options);
+app.use('/test', async (req, res) => {
+  const { target = TARGET, proxyFlag = PROXY_FLAG } = req.query;
+  options.target = target;
+  setProxy(proxyFlag, options);
+  const reqUrl = `http://localhost:3000${proxyFlag}${req.path}`;
+  const response = await axios(reqUrl).catch(err => {console.log('err', err);});
+  const realIp = response.headers['x-real-ip'];
   res.json({
-    data: [
-      { name: '1', age: 11 },
-      { name: '2', age: 12 },
-      { name: '3', age: 13 },
-    ]
+    proxyTarget: options.target,
+    beforeProxy: reqUrl,
+    afterProxy: realIp
   });
 });
 app.listen(PORT, () => {
